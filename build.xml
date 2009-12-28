@@ -1,0 +1,50 @@
+<project name="Hello World App" default="build">
+   <taskdef resource="bb-ant-defs.xml" />
+
+   <!-- rapc and sigtool require the jde.home property to be set -->
+   <property name="jde.home" location="/Users/rob/Desktop/JDE" />
+
+   <!-- directory of simulator to copy files to -->
+   <property name="simulator.home" location="/Volumes/Java/JDE4.2/simulator" />
+
+   <!-- directory of simulator to copy files to -->
+   <property name="export.dir" location="/Users/rob/web/bblock" />
+
+   <property name="src.dir" location="src" />
+   <property name="build.dir" location="build" />
+   <property name="cod.name" value="bblock" />
+   <property name="icon.name" value="bblock.png" />
+
+   <target name="build">
+      <mkdir dir="${build.dir}" />
+      <rapc output="${cod.name}" srcdir="${src.dir}" destdir="${build.dir}">
+         <jdp title="BBLock"
+              version="0.1"
+              description="Lock up that 9700 FOR REAL!1"
+              vendor="burningsoda.com"
+              icon="bblock.png" />
+      </rapc>
+   </target>
+
+   <target name="sign">
+      <sigtool codfile="${build.dir}/${cod.name}.cod" />
+   </target>
+
+   <target name="clean">
+      <delete dir="${build.dir}" />
+   </target>
+
+   <target name="load-simulator" depends="build">
+      <copy todir="${simulator.home}">
+         <fileset dir="${build.dir}" includes="*.cod,*.cso,*.debug,*.jad,*.jar" />
+      </copy>
+   </target>
+
+   <target name="export" depends="build">
+      <copy todir="${export.dir}">
+         <fileset dir="${build.dir}" includes="*.cod,*.jad" />
+         <fileset dir="." includes="${icon.name}" />
+      </copy>
+   </target>
+
+</project>
