@@ -115,44 +115,69 @@ implements RealtimeClockListener {
     }
 
     public void clockUpdated() {
-        setTitle(getDateTimeString());
+        timeString = getDateTimeString();
         invalidate();
     }
 
+    private String timeString = null;
+    private int displayWidth = -1;
+    private int displayHeight = -1;
+    private Font clockFont = null;
+    private Font unlockFont = null;
+
     public void paint(Graphics g) {
-        int width = 480; // Display.getWidth()
-        int height = 360; // Display.getHeight()
-        Font font = null;
-        try {
-            font = FontFamily.forName("BBMillbank").getFont(Font.BOLD, height / 2).derive(Font.BOLD, height / 2, Ui.UNITS_px, Font.ANTIALIAS_SUBPIXEL, 0);
-        } catch (Exception e) {
-            font = Font.getDefault().derive(Font.BOLD, height / 2);
+        if (timeString == null) {
+            timeString = getDateTimeString();
         }
+        if (displayWidth == -1) {
+            displayWidth = 480;
+        }
+        if (displayHeight == -1) {
+            displayHeight = 360;
+        }
+        if (unlockFont == null) {
+            try {
+                unlockFont = FontFamily.forName("BBMillbank").getFont(Font.BOLD, 18);
+            } catch (Exception e) {
+                unlockFont = Font.getDefault().derive(Font.BOLD, 18);
+            }
+        }
+        if (clockFont == null) {
+            clockFont = unlockFont.derive(Font.BOLD, displayHeight / 2, Ui.UNITS_px,
+                                          Font.ANTIALIAS_SUBPIXEL, 0);
+        }
+
         g.setBackgroundColor(Graphics.BLACK);
-        g.setColor(Graphics.WHITE);
-        g.setFont(font);
         g.clear();
-        g.drawText(getDateTimeString(), 0, height / 2,
-                   DrawStyle.VCENTER | DrawStyle.HCENTER, width);
+
+        g.setColor(Color.WHITE);
+        g.setFont(clockFont);
+        g.drawText(timeString, 0, displayHeight / 2,
+                   DrawStyle.VCENTER | DrawStyle.HCENTER, displayWidth);
+
+        g.setColor(Color.DIMGRAY);
+        g.setFont(unlockFont);
+        g.drawText("Triple-click trackpad to unlock.", 0, displayHeight / 2 + displayHeight / 4,
+                   DrawStyle.TOP | DrawStyle.HCENTER, displayWidth);
     }
 
     public LockScreen() {
-        clockUpdated();
+        //clockUpdated();
 
         // Add a read only text field (RichTextField) to the screen.  The RichTextField
         // is focusable by default.  In this case we provide a style to make the field
         // non-focusable.
-        add(new RichTextField("BBLock", Field.NON_FOCUSABLE));
+        //add(new RichTextField("BBLock", Field.NON_FOCUSABLE));
 
         Trackball.setSensitivityX(Trackball.SENSITIVITY_OFF);
         Trackball.setSensitivityY(Trackball.SENSITIVITY_OFF);
     }
 
-    public void close() {
+    /*public void close() {
         // Display a farewell message before closing application.
         Dialog.alert("Goodbye!");
         super.close();
-    }
+    }*/
 
     protected boolean navigationMovement(int dx, int dy, int status, int time) {
         return true;
