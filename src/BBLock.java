@@ -121,7 +121,7 @@ implements RealtimeClockListener {
 
     public void paint(Graphics g) {
         int width = 480; // Display.getWidth()
-        int height = 320; // Display.getHeight()
+        int height = 360; // Display.getHeight()
         Font font = null;
         try {
             font = FontFamily.forName("BBMillbank").getFont(Font.BOLD, height / 2).derive(Font.BOLD, height / 2, Ui.UNITS_px, Font.ANTIALIAS_SUBPIXEL, 0);
