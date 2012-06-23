@@ -1,8 +1,10 @@
 <project name="Hello World App" default="build">
    <taskdef resource="bb-ant-defs.xml" />
+   <!--<taskdef resource="bb-ant-defs.xml" classpath="${basedir}/lib/bb-ant-tools/bb-ant-tools.jar" />-->
 
    <!-- rapc and sigtool require the jde.home property to be set -->
-   <property name="jde.home" location="/Users/rob/Desktop/JDE" />
+   <property name="jde.home" location="/Applications/Eclipse/plugins/net.rim.ejde.componentpack5.0.0_5.0.0.36/components" />
+   <!--<property name="jde.home" location="/Applications/Eclipse/plugins/net.rim.ejde.componentpack7.1.0_7.1.0.7/components" />-->
 
    <!-- directory of simulator to copy files to -->
    <property name="simulator.home" location="/Volumes/Java/JDE4.2/simulator" />
