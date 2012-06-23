@@ -9,17 +9,17 @@
    <property name="src.dir" location="src" />
    <property name="res.dir" location="res" />
    <property name="build.dir" location="build" />
-   <property name="cod.name" value="bblock" />
-   <property name="icon.name" value="bblock.png" />
+   <property name="cod.name" value="lockwithaclock" />
 
    <target name="build">
       <mkdir dir="${build.dir}" />
+      <copy file="${res.dir}/icon.png" tofile="${build.dir}/${cod.name}.png" />
       <rapc output="${cod.name}" srcdir="${src.dir}" destdir="${build.dir}">
-         <jdp title="BBLock"
-              version="0.1"
-              description="Lock up that 9700 FOR REAL!1"
+         <jdp title="Lock with a clock"
+              version="0.2"
+              description="Lock up that berry for real!"
               vendor="burningsoda.com"
-              icon="${icon.name}" />
+              icon="${cod.name}.png" />
       </rapc>
    </target>
 
@@ -52,8 +52,7 @@
    <target name="export" depends="sign">
       <copy todir="${export.dir}">
          <fileset dir="${build.dir}" includes="*.cod,*.jad" />
-         <fileset dir="${res.dir}" includes="${icon.name}" />
       </copy>
+      <copy file="${res.dir}/icon.png" tofile="${export.dir}/${cod.name}.png" />
    </target>
-
 </project>
