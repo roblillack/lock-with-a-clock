@@ -15,6 +15,7 @@ import net.rim.device.api.system.Backlight;
 
 import net.rim.device.api.ui.*;
 import net.rim.device.api.ui.container.*;
+import net.rim.device.api.ui.decor.*;
 import net.rim.device.api.ui.component.*;
 import net.rim.device.api.system.*;
 
@@ -71,7 +72,7 @@ final class RobsKeyListener implements KeyListener, TrackwheelListener {
     }
 }
 
-public class BBLock extends UiApplication {
+public class BBLock extends UiApplication implements SystemListener2 {
     LockScreen screen;
 
     public static void main(String[] args) {
@@ -85,15 +86,59 @@ public class BBLock extends UiApplication {
 
     public BBLock() {
         screen = new LockScreen();
-
         addRealtimeClockListener(screen);
-        RobsKeyListener l = new RobsKeyListener();
-        addKeyListener(l);
-        addTrackwheelListener(l);
-        pushScreen(screen);
 
-        //Backlight.enable(false);
+        //RobsKeyListener l = new RobsKeyListener();
+        //addKeyListener(l);
+        //addTrackwheelListener(l);
+        Backlight.enable(false);
+
+        displayScreen();
+        /*
+         * TODO:
+         * ApplicationManager.unlockSystem(), wenn
+         * powerOff() aus SystemListener abfangen und selbst zum restart setzen
+         */
     }
+
+    public void displayScreen() {
+        /*if (!screen.isDisplayed()) {
+            invokeLater(new Runnable() {
+                public void run() {
+                    Ui.getUiEngine().pushGlobalScreen(screen, 0, UiEngine.GLOBAL_MODAL);
+                }
+            });
+            }*/
+        pushScreen(screen);
+    }
+
+    /* Ignores Green & Red key, when backlight is off. */
+    public void deactivate() {
+        requestForeground();
+    }
+
+    /** SystemListener2 *******************************************************/
+    public void batteryGood() {}
+    public void batteryLow() {}
+    public void batteryStatusChange(int status) {}
+    public void powerOff() {}
+
+    public void powerUp() {
+        requestForeground();
+    }
+
+    public void backlightStateChange(boolean on) {
+        //if (on) {
+        requestForeground();
+        //}
+    }
+
+    public void cradleMismatch(boolean mismatch) {}
+    public void fastReset() {}
+    public void powerOffRequested(int reason) {}
+    public void usbConnectionStateChange(int state) {}
+    /**************************************************************************/
+
 }
 
 final class LockScreen
@@ -143,12 +188,9 @@ implements RealtimeClockListener {
             }
         }
         if (clockFont == null) {
-            clockFont = unlockFont.derive(Font.BOLD, displayHeight / 2, Ui.UNITS_px,
+            clockFont = unlockFont.derive(Font.BOLD, 160, Ui.UNITS_px,
                                           Font.ANTIALIAS_SUBPIXEL, 0);
         }
-
-        g.setBackgroundColor(Graphics.BLACK);
-        g.clear();
 
         g.setColor(Color.WHITE);
         g.setFont(clockFont);
@@ -171,6 +213,9 @@ implements RealtimeClockListener {
 
         Trackball.setSensitivityX(Trackball.SENSITIVITY_OFF);
         Trackball.setSensitivityY(Trackball.SENSITIVITY_OFF);
+
+        //addKeyListener(new RobsKeyListener());
+        setBackground(BackgroundFactory.createLinearGradientBackground(Color.BLACK, Color.BLACK, 0x00770000, 0x00770000));
     }
 
     /*public void close() {
@@ -188,6 +233,52 @@ implements RealtimeClockListener {
     }
 
     protected boolean navigationUnclick(int status, int time) {
+        return true;
+    }
+
+    protected boolean trackwheelClick(int status, int time) {
+        return true;
+    }
+
+    protected boolean trackwheelRoll(int amount, int status, int time) {
+        return true;
+    }
+
+    protected boolean trackwheelUnclick(int status, int time) {
+        return true;
+    }
+
+    private int asteriskTime = -1;
+    public boolean keyDown(int keycode, int time) {
+        // lock/standby
+        /*if (keycode == 268632064 || keycode == 17891328) {
+            System.exit(0);
+        }*/
+
+        // space == exit
+        if (keycode == 2097152) { //net.rim.device.api.ui.Keypad.KEY_SPACE) {
+            if (asteriskTime == -1) {
+                asteriskTime = time;
+                return true;
+            } else if (time < asteriskTime + 1000) {
+                System.exit(0);
+            }
+        }
+
+        asteriskTime = -1;
+        return true;
+    }
+
+    public boolean keyChar( char key, int status, int time) {
+        return true;
+    }
+    public boolean keyRepeat(int keycode, int time) {
+        return true;
+    }
+    public boolean keyStatus(int keycode, int time) {
+        return true;
+    }
+    public boolean keyUp(int keycode, int time) {
         return true;
     }
 }
