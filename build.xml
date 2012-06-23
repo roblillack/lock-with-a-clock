@@ -1,18 +1,13 @@
 <project name="Hello World App" default="build">
+   <property file="local.properties"/>
+   <property file="default.properties"/>
+   
    <taskdef resource="bb-ant-defs.xml" />
-   <!--<taskdef resource="bb-ant-defs.xml" classpath="${basedir}/lib/bb-ant-tools/bb-ant-tools.jar" />-->
 
-   <!-- rapc and sigtool require the jde.home property to be set -->
-   <property name="jde.home" location="/Applications/Eclipse/plugins/net.rim.ejde.componentpack5.0.0_5.0.0.36/components" />
-   <!--<property name="jde.home" location="/Applications/Eclipse/plugins/net.rim.ejde.componentpack7.1.0_7.1.0.7/components" />-->
-
-   <!-- directory of simulator to copy files to -->
-   <property name="simulator.home" location="/Volumes/Java/JDE4.2/simulator" />
-
-   <!-- directory of simulator to copy files to -->
-   <property name="export.dir" location="/Users/rob/web/bblock" />
+   <property name="jde.home" location="${blackberry.sdk.dir}" />
 
    <property name="src.dir" location="src" />
+   <property name="res.dir" location="res" />
    <property name="build.dir" location="build" />
    <property name="cod.name" value="bblock" />
    <property name="icon.name" value="bblock.png" />
@@ -24,12 +19,24 @@
               version="0.1"
               description="Lock up that 9700 FOR REAL!1"
               vendor="burningsoda.com"
-              icon="bblock.png" />
+              icon="${icon.name}" />
       </rapc>
    </target>
 
    <target name="sign">
-      <sigtool codfile="${build.dir}/${cod.name}.cod" />
+      <antcall target="signwithpw" />
+      <antcall target="signwithoutpw" />
+   </target>
+
+   <target name="signwithpw" depends="build" if="blackberry.sign.password">
+      <sigtool sigtooljar="${blackberry.sign.dir}/SignatureTool.jar"
+               codfile="${build.dir}/${cod.name}.cod"
+               password="${blackberry.sign.password}" />
+   </target>
+   
+   <target name="signwithoutpw" depends="build" unless="blackberry.sign.password">
+      <sigtool sigtooljar="${blackberry.sign.dir}/SignatureTool.jar"
+               codfile="${build.dir}/${cod.name}.cod" />
    </target>
 
    <target name="clean">
@@ -37,15 +44,15 @@
    </target>
 
    <target name="load-simulator" depends="build">
-      <copy todir="${simulator.home}">
+      <copy todir="${simulator.dir}">
          <fileset dir="${build.dir}" includes="*.cod,*.cso,*.debug,*.jad,*.jar" />
       </copy>
    </target>
 
-   <target name="export" depends="build">
+   <target name="export" depends="sign">
       <copy todir="${export.dir}">
          <fileset dir="${build.dir}" includes="*.cod,*.jad" />
-         <fileset dir="." includes="${icon.name}" />
+         <fileset dir="${res.dir}" includes="${icon.name}" />
       </copy>
    </target>
 
