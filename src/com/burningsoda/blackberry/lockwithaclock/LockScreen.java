@@ -1,21 +1,16 @@
 package com.burningsoda.blackberry.lockwithaclock;
 
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import net.rim.device.api.i18n.DateFormat;
 import net.rim.device.api.system.Backlight;
 import net.rim.device.api.system.Display;
 import net.rim.device.api.system.KeyListener;
 import net.rim.device.api.system.RealtimeClockListener;
-import net.rim.device.api.ui.Color;
-import net.rim.device.api.ui.DrawStyle;
-import net.rim.device.api.ui.Font;
-import net.rim.device.api.ui.FontFamily;
-import net.rim.device.api.ui.Graphics;
-import net.rim.device.api.ui.Ui;
+import net.rim.device.api.ui.*;
 import net.rim.device.api.ui.container.MainScreen;
+
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 final class LockScreen
 extends MainScreen
@@ -66,11 +61,11 @@ implements RealtimeClockListener, KeyListener {
             }
         }
         if (clockFont == null) {
-        	
+            int size = displayWidth >= 480 ? (displayWidth >= 640 ? 200 : 160) : 96;
         	try {
-        	clockFont = FontFamily.forName(FontFamily.FAMILY_SYSTEM).getFont(FontFamily.SCALABLE_FONT, 160).derive(Font.BOLD);
+        	    clockFont = FontFamily.forName("BBMillbankTall").getFont(FontFamily.SCALABLE_FONT, size).derive(Font.BOLD);
         	} catch(Exception e) {
-        		clockFont = unlockFont.derive(Font.BOLD, 160, Ui.UNITS_px, Font.ANTIALIAS_SUBPIXEL, 0);
+        		clockFont = unlockFont.derive(Font.BOLD, size, Ui.UNITS_px, Font.ANTIALIAS_SUBPIXEL, 0);
         	}
         }
 

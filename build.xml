@@ -16,7 +16,7 @@
       <copy file="${res.dir}/icon.png" tofile="${build.dir}/${cod.name}.png" />
       <rapc output="${cod.name}" srcdir="${src.dir}" destdir="${build.dir}">
          <jdp title="Lock with a clock"
-              version="0.2"
+              version="0.2.1"
               description="Lock up that berry for real!"
               vendor="burningsoda.com"
               icon="${cod.name}.png" />
