@@ -1,0 +1,21 @@
+# Lock With A Clock
+
+‘[Lock With A Clock](http://burningsoda.com/software/lock-with-a-clock)’ is a simple, yet effective, lock screen for your OS5-OS7.1 BlackBerry smartphone.
+
+# Setting up a sane build environment (on OS X)
+1. Install [Eclipse](http://eclipse.org). You'll just need this to download the BB SDKs.
+2. Add this Update site: http://www.blackberry.com/go/eclipseUpdate/mac/java
+3. Install "BlackBerry Java SDK 7.1" + "BlackBerry Java SDK 5.0" (and the Java Plug-in CORE if you like)
+4. Install Oracle's [Java ME SDK 3.0](http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javame-419430.html#sun_java_me_sdk-3.0-rr-mac-JPR)
+5. Copy the J2ME SDK's native `preverify` command somewhere: `cp /Applications/Java_ME_SDK_3.0.app/Contents/Resources/bin/preverify ~/bin`
+6. Install [ant](http://ant.apache.org)
+7. Install [bb-ant-tools](http://bb-ant-tools.sf.net), copy the `.jar` to `~/.ant/lib`
+8. Copy `SignatureTool.jar` from the 7.1 SDK and your `sigtool.*` into some folder you choose (`~/.blackberry-sign` sounds good):
+   `mkdir ~/.blackkberry-sign && cp /Applications/Eclipse/plugins/net.rim.ejde.componentpack7.1.0_7.1.0.7/components/bin/SignatureTool.jar ~/.blackberry-sign`
+9. Create a copy of `default.properties` in the root dir of the Java project, call it `local.properties` and configure your BlackBerry sign dir and password
+10. Run `ant clean build sign`
+
+# Creating a BlackBerry Java project with IntelliJ
+1. Create an empty Java project
+2. Configure the project to use “No SDK”
+3. Add the `net_rim_api` JAR of the BB SDK you'd like to use as ‘External Library’
