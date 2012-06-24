@@ -2,15 +2,14 @@ package com.burningsoda.blackberry.lockwithaclock;
 
 import net.rim.blackberry.api.phone.Phone;
 import net.rim.blackberry.api.phone.PhoneListener;
-import net.rim.device.api.ui.*;
-import net.rim.device.api.ui.container.*;
-//import net.rim.device.api.ui.decor.*;
-import net.rim.device.api.ui.component.*;
-import net.rim.device.api.system.*;
-import java.util.*;
+import net.rim.device.api.system.ApplicationDescriptor;
+import net.rim.device.api.system.ApplicationManager;
+import net.rim.device.api.system.SystemListener2;
+import net.rim.device.api.ui.UiApplication;
 
-public class LockApp extends UiApplication implements SystemListener2, GlobalEventListener {
+public class LockApp extends UiApplication implements SystemListener2 {
     LockScreen screen;
+    PhoneListener phoneListener;
 
     public static void main(String[] args) {
         LockApp theApp = new LockApp();
@@ -20,28 +19,31 @@ public class LockApp extends UiApplication implements SystemListener2, GlobalEve
 
     public LockApp() {
         addSystemListener(this);
-        addGlobalEventListener(this);
-        Phone.addPhoneListener(new OnCallAnsweredQuit(this.getProcessId()));
+        phoneListener = new OnCallAnsweredQuit(this);
+        Phone.addPhoneListener(phoneListener);
     }
-    
-    public void eventOccurred(long guid, int data0, int data1, Object object0, Object object1) {
-    	System.out.println("*** EVENT ***");
-        if (guid == 0xCAFEBABE) {
-        	invokeLater(new Runnable() {
-            	public void run() {
-                	quit();
-            	}
-            });
-        }
-    }
-    
+
     public void quit() {
-    	if (screen != null) {
-    		System.out.println("*** closing screen");
-    		screen.close();
-    	}
-    	System.out.println("*** exiting");
-    	System.exit(0);
+        invokeLater(new Runnable() {
+            public void run() {
+                if (phoneListener != null) {
+                    Phone.removePhoneListener(phoneListener);
+                }
+
+                removeSystemListener(LockApp.this);
+
+                if (screen != null) {
+                    removeKeyListener(screen);
+                    removeRealtimeClockListener(screen);
+                    System.out.println("*** closing screen");
+                    screen.stopBacklightTask();
+                    screen.close();
+                }
+
+                System.out.println("*** exiting");
+                System.exit(0);
+            }
+        });
     }
     
     public void enableLock() {
