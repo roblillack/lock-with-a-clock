@@ -15,6 +15,9 @@ import java.util.TimerTask;
 final class LockScreen
 extends MainScreen
 implements RealtimeClockListener, KeyListener {
+    private static final int STATE_NORMAL = 0;
+    private static final int STATE_FIRST_CLICK_DOWN = 1;
+    private static final int STATE_NEXT_CLICK_UNLOCKS = 2;
 
     public void clockUpdated() {
         invalidate();
@@ -31,10 +34,10 @@ implements RealtimeClockListener, KeyListener {
     private boolean isExposed = false;
     
     private static final int backlightTimeout = 3500;
-    private static final int keypressTimeout = 500;
-    
-    private boolean nextClickUnlocks = false;
-    
+    private static final int keypressTimeout = 400;
+
+    private int state = STATE_NORMAL;
+
     private DateFormat timeFormat;
     private DateFormat dateFormat;
     private int maxBrightness;
@@ -91,7 +94,7 @@ implements RealtimeClockListener, KeyListener {
         g.setColor(Color.DIMGRAY);
         g.drawText(dateFormat.formatLocal(now), 0, 3, DrawStyle.TOP | DrawStyle.RIGHT, displayWidth - 6);
         	
-        g.drawText(nextClickUnlocks ?
+        g.drawText(state == STATE_NEXT_CLICK_UNLOCKS ?
         		   "Click Trackpad again to unlock." :
         		   "Double-click Trackpad to unlock.", 0, displayHeight / 2 + displayHeight / 4,
                    DrawStyle.TOP | DrawStyle.HCENTER, displayWidth);
@@ -163,32 +166,33 @@ implements RealtimeClockListener, KeyListener {
     	}
         displayOffTimer.schedule(displayOffTask, backlightTimeout);
     }
-    
-    /*public void close() {
-        // Display a farewell message before closing application.
-        Dialog.alert("Goodbye!");
-        super.close();
-    }*/
 
     protected boolean navigationMovement(int dx, int dy, int status, int time) {
+        resetState();
         return true;
     }
 
     protected boolean navigationClick(int status, int time) {
+        // ignore click-and-hold etc.
+        if ((status & KeyListener.STATUS_FOUR_WAY) != KeyListener.STATUS_FOUR_WAY) {
+            return true;
+        }
+
     	//Backlight.setBrightness(maxBrightness);
     	reScheduleBacklight();
     	
-    	if (nextClickUnlocks) {
-    		app.quit();
+    	if (state == STATE_NEXT_CLICK_UNLOCKS) {
+            // Ok, this is the click event of the final click.
+            // Do _not_ and wait patiently for the unlick event ....
     		return true;
     	}
-    	
-        nextClickUnlocks = true;
-        invalidate();
+
+        // Actually we measure the time between the first click DOWN and the second click UP
+        // to account for accidential clicks
+        setState(STATE_FIRST_CLICK_DOWN);
         TimerTask task = new TimerTask() {
         	public void run() {
-        		LockScreen.this.nextClickUnlocks = false;
-        		LockScreen.this.invalidate();
+        		LockScreen.this.resetState();
        		}
        	};
        	new Timer().schedule(task, keypressTimeout);
@@ -196,7 +200,17 @@ implements RealtimeClockListener, KeyListener {
     }
 
     protected boolean navigationUnclick(int status, int time) {
-    	System.out.println("*** Navigation unclick");
+        // ignore click-and-hold etc.
+        if ((status & KeyListener.STATUS_FOUR_WAY) != KeyListener.STATUS_FOUR_WAY) {
+            return true;
+        }
+
+        if (state == STATE_FIRST_CLICK_DOWN) {
+            setState(STATE_NEXT_CLICK_UNLOCKS);
+        } else if (state == STATE_NEXT_CLICK_UNLOCKS) {
+            app.quit();
+        }
+
         return true;
     }
 
@@ -213,13 +227,11 @@ implements RealtimeClockListener, KeyListener {
     }
 
     public boolean keyDown(int keycode, int time) {
-    	nextClickUnlocks = false;
-    	System.out.println("*** keypress!");
-		invalidate();
+    	resetState();
     	return true;
     }
 
-    public boolean keyChar( char key, int status, int time) {
+    public boolean keyChar(char key, int status, int time) {
         return true;
     }
     public boolean keyRepeat(int keycode, int time) {
@@ -229,6 +241,16 @@ implements RealtimeClockListener, KeyListener {
         return true;
     }
     public boolean keyUp(int keycode, int time) {
-		return true;
+        resetState();
+        return true;
+    }
+
+    private void resetState() {
+        setState(STATE_NORMAL);
+    }
+
+    private void setState(int s) {
+        state = s;
+        invalidate();
     }
 }
